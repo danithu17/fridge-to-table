@@ -46,6 +46,17 @@ jobs:
             sed -i 's|</application>|        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>\n    </application>|' "$AD_MANIFEST"
           fi
 
+          # Fix minSdkVersion for AdMob (Required: 21)
+          GRADLE_FILE="android/app/build.gradle"
+          if [ -f "$GRADLE_FILE" ]; then
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' "$GRADLE_FILE"
+            sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' "$GRADLE_FILE"
+          fi
+
+          # Create missing directories to avoid pubspec errors
+          mkdir -p assets/animations assets/images
+          touch assets/animations/.gitkeep assets/images/.gitkeep
+
       - name: Install dependencies
         run: flutter pub get
 
