@@ -64,7 +64,7 @@ class RecipeDetailScreen extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFFF6B35), Color(0xFF2D3047)],
                   begin: Alignment.topLeft,
@@ -75,7 +75,7 @@ class RecipeDetailScreen extends StatelessWidget {
                 child: Icon(Icons.restaurant_menu_rounded, size: 100, color: Colors.white30),
               ),
             ),
-            const Positioned(
+            Positioned(
               bottom: -1,
               left: 0,
               right: 0,

@@ -115,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             right: 0,
             height: 300,
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFFFFE5D9), Color(0xFFF9F9F4)],
                   begin: Alignment.topCenter,
