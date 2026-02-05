@@ -1,46 +1,16 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-# fridge-to-table
-=======
->>>>>>> e63832a (Initial FridgeFeast commit with GitHub Actions)
-# FridgeFeast 🥘
+# fridge_to_table
 
-FridgeFeast is a cross-platform mobile app built with Flutter and powered by Google Gemini AI. It helps you find creative recipes using exactly what's in your fridge.
-
-## Features
-
-- **AI Ingredient Input**: Type ingredients or take a photo of your fridge.
-- **Recipe Generation**: Generates 3 unique recipes based on ingredients using Gemini 1.5 Flash.
-- **Detailed Instructions**: View prep time, difficulty, and step-by-step cooking guides.
-- **Modern UI**: A clean, foodie-friendly aesthetic with a warm orange palette.
+A new Flutter project.
 
 ## Getting Started
 
-### Prerequisites
+This project is a starting point for a Flutter application.
 
-- Flutter SDK installed.
-- A Gemini API Key from [Google AI Studio](https://aistudio.google.com/).
+A few resources to get you started if this is your first Flutter project:
 
-### Setup
+- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-1. Clone the repository or download the files.
-2. Open `lib/screens/home_screen.dart` and replace `YOUR_GEMINI_API_KEY_HERE` with your actual API key.
-3. Run the following commands:
-
-```bash
-flutter pub get
-flutter run
-```
-
-## Dependencies
-
-- `google_generative_ai`: Gemini API integration.
-- `image_picker`: Camera and gallery access.
-- `flutter_riverpod`: State management.
-- `google_fonts`: Outfit typography.
-- `lottie`: Smooth animations.
-<<<<<<< HEAD
-=======
->>>>>>> 55d74af (Initial FridgeFeast commit with GitHub Actions)
->>>>>>> e63832a (Initial FridgeFeast commit with GitHub Actions)
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.

@@ -16,81 +16,28 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The Python extension for Visual Studio Code creates this
-.vscode/
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/GeneratedConfig.xcconfig
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/Flutter/flutter_framework_list.lua
-**/ios/Flutter/App.podspec
-**/ios/ServiceDefinitions.json
-**/.dart_tool/
-**/.packages
-**/.pub-cache/
-**/.pub/
-**/build/
-**/pubspec-override.yaml
-**/pubspec.lock
-
-# Web related
-**/lib/generated_plugin_registrant.dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
 
 # Symbolication related
-**/app.*.symbols
+app.*.symbols
 
-# Executable related
-**/app.*.js.map
-**/app.*.js.deps
-**/app.*.js
+# Obfuscation related
+app.*.map.json
 
-# Android related
-**/android/key.properties
-**/android/app/src/main/res/raw/
-**/android/app/local.properties
-**/android/app/flutter_bootstrap.properties
-**/android/app/generated/
-**/android/app/build.gradle
-/android/app/debug/
-/android/app/profile/
-/android/app/release/
-
-# Coverage
-**/coverage/
-
-# Exceptions to above
-!**/ios/Flutter/AppFrameworkInfo.plist
-!**/ios/Flutter/Info.plist
-
-# Windows related
-**/windows/flutter/generated_config.xcconfig
-**/windows/flutter/ephemeral/
-**/windows/flutter/flutter_assemble.path
-**/windows/flutter/flutter_layout.path
-**/windows/flutter/flutter_wrapper_app.path
-**/windows/flutter/flutter_wrapper_plugin.path
-**/windows/cmake-build-*/
-**/windows/out/
-**/windows/x64/
-
-# Linux related
-**/linux/flutter/generated_config.xcconfig
-**/linux/flutter/ephemeral/
-**/linux/cmake-build-*/
-**/linux/out/
-
-# macOS related
-**/macos/Flutter/ephemeral/
-**/macos/Flutter/GeneratedConfig.xcconfig
-**/macos/CMakeCache.txt
-**/macos/cmake_install.cmake
-**/macos/CMakeFiles/
-**/macos/Makefile
-**/macos/install_manifest.txt
-**/macos/compile_commands.json
-**/macos/out/
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
