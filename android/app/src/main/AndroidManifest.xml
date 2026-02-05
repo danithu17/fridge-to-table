@@ -1,5 +1,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-<<<<<<< HEAD
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
@@ -10,14 +9,6 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-7036399347927896~5750385934"/>
-=======
-    <application
-        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>
-        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>
-        android:label="fridge_to_table"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
->>>>>>> 5799d9e17bd869c8d8ab2b834374425afac2fa97
         <activity
             android:name=".MainActivity"
             android:exported="true"
