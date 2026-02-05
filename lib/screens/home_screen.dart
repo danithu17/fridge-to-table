@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../services/gemini_service.dart';
 import '../models/recipe.dart';
 import 'recipe_detail_screen.dart';
+import '../services/ad_manager.dart';
 
 // Providers
 final ingredientsProvider = StateProvider<List<String>>((ref) => []);
@@ -26,6 +27,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   final GeminiService _geminiService = GeminiService(_googleApiKey);
   final ImagePicker _picker = ImagePicker();
+  final AdManager _adManager = AdManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _adManager.loadRewardedAd(onAdLoaded: () {});
+  }
 
   void _addIngredient(String ingredient) {
     if (ingredient.trim().isEmpty) return;
@@ -66,17 +74,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    ref.read(isLoadingProvider.notifier).state = true;
-    try {
-      final recipes = await _geminiService.generateRecipesFromIngredients(ingredients);
-      ref.read(recipesProvider.notifier).state = recipes;
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error generating recipes: $e')),
-      );
-    } finally {
-      ref.read(isLoadingProvider.notifier).state = false;
-    }
+    _adManager.showRewardedAd(
+      onUserEarnedReward: () async {
+        ref.read(isLoadingProvider.notifier).state = true;
+        try {
+          final recipes = await _geminiService.generateRecipesFromIngredients(ingredients);
+          ref.read(recipesProvider.notifier).state = recipes;
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error generating recipes: $e')),
+          );
+        } finally {
+          ref.read(isLoadingProvider.notifier).state = false;
+        }
+      },
+      onAdClosed: () {},
+    );
   }
 
   @override
