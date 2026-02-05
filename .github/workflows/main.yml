@@ -47,10 +47,21 @@ jobs:
           fi
 
           # Fix minSdkVersion for AdMob (Required: 21)
-          GRADLE_FILE="android/app/build.gradle"
-          if [ -f "$GRADLE_FILE" ]; then
-            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' "$GRADLE_FILE"
-            sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' "$GRADLE_FILE"
+          GRADLE_APP_FILE="android/app/build.gradle"
+          if [ -f "$GRADLE_APP_FILE" ]; then
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' "$GRADLE_APP_FILE"
+            sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' "$GRADLE_APP_FILE"
+          fi
+
+          # Fix Kotlin version (Required: 1.9.10+ for newer dependencies)
+          GRADLE_PROJECT_FILE="android/build.gradle"
+          if [ -f "$GRADLE_PROJECT_FILE" ]; then
+            sed -i "s/ext.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.10'/g" "$GRADLE_PROJECT_FILE"
+          fi
+
+          GRADLE_SETTINGS_FILE="android/settings.gradle"
+          if [ -f "$GRADLE_SETTINGS_FILE" ]; then
+            sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.10"/g' "$GRADLE_SETTINGS_FILE"
           fi
 
           # Create missing directories to avoid pubspec errors
