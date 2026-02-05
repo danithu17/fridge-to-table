@@ -1,4 +1,4 @@
-name: Generate Flutter Project and Build APK
+name: Full Project Build with AI and Ads
 
 on:
   push:
@@ -17,28 +17,26 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      # 1. Flutter Project එක හදනවා
       - name: Create Flutter Structure
         run: |
           flutter create --org com.danithu --project-name fridge_to_table . --overwrite
 
-      # 2. අවශ්‍ය Packages එකතු කිරීම
-      - name: Add Dependencies
+      - name: Add All Dependencies
         run: |
-          flutter pub add google_mobile_ads google_fonts
+          flutter pub add google_mobile_ads google_fonts connectivity_plus google_generative_ai image_picker
 
-      # 3. Kotlin Version එක 1.9.0 ට අප්ඩේට් කිරීම (Error එකට විසඳුම)
       - name: Update Kotlin Version
         run: |
           sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.0"/g' android/build.gradle
 
-      # 4. AndroidManifest එක නිවැරදිව සැකසීම
       - name: Setup Valid AndroidManifest
         run: |
           cat <<EOF > android/app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.CAMERA"/>
               <application
-                  android:label="Fridge to Table"
+                  android:label="Fridge to Table AI"
                   android:name="\${applicationName}"
                   android:icon="@mipmap/ic_launcher">
                   <meta-data
@@ -60,34 +58,28 @@ jobs:
                           <category android:name="android.intent.category.LAUNCHER"/>
                       </intent-filter>
                   </activity>
-                  <meta-data
-                      android:name="flutterEmbedding"
-                      android:value="2" />
+                  <meta-data android:name="flutterEmbedding" android:value="2" />
               </application>
           </manifest>
           EOF
 
-      # 5. MinSDK 21 කිරීම
       - name: Fix MinSDK
         run: |
           sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
 
-      # 6. APK Build කිරීම
       - name: Build Debug APK
         run: flutter build apk --debug
 
-      # 7. APK එක Upload කිරීම
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: fridge-to-table-debug-apk
+          name: fridge-to-table-full-v1
           path: build/app/outputs/flutter-apk/app-debug.apk
 
-      # 8. සේරම Files Repo එකට Push කිරීම
       - name: Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Updated Kotlin version to 1.9.0 and fixed build" || echo "No changes"
+          git commit -m "Full AI + Ads + Connectivity Setup" || echo "No changes"
           git push
