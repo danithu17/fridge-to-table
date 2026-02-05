@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
 
 void main() async {
-  // Flutter Engine එක සහ AdMob Initialize කිරීම
   WidgetsFlutterBinding.ensureInitialized();
   await MobileAds.instance.initialize();
-  
   runApp(const FridgeToTableApp());
 }
 
@@ -16,12 +16,10 @@ class FridgeToTableApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fridge to Table',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        // ඇප් එකේ ප්‍රධාන පාට කොළ පාට (Fresh Look)
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green.shade700),
+        colorSchemeSeed: Colors.green,
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
       home: const HomeScreen(),
@@ -38,88 +36,89 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   BannerAd? _bannerAd;
-  bool _isBannerAdLoaded = false;
-
-  // ⚠️ මේක Google දෙන Test ID එක. ඇප් එක රන් වෙලා ඇඩ්ස් පේනවද බලන්න මේක පාවිච්චි කරන්න.
-  final String adUnitId = 'ca-app-pub-3940256099942544/6300978111';
+  bool _isAdLoaded = false;
+  late StreamSubscription<List<ConnectivityResult>> connectivitySub;
 
   @override
   void initState() {
     super.initState();
-    _loadBannerAd();
+    _initAd();
+    _checkInternet();
   }
 
-  void _loadBannerAd() {
+  // 1. AdMob Setup
+  void _initAd() {
     _bannerAd = BannerAd(
-      adUnitId: adUnitId,
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Test ID
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _isBannerAdLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          debugPrint('Ad failed to load: $error');
-        },
+        onAdLoaded: (ad) => setState(() => _isAdLoaded = true),
+        onAdFailedToLoad: (ad, err) => ad.dispose(),
       ),
     )..load();
+  }
+
+  // 2. Internet Connection Check
+  void _checkInternet() {
+    connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.contains(ConnectivityResult.none)) {
+        _showError("No Internet!", "AI scan එක වැඩ කරන්න නම් ඉන්ටර්නෙට් ඕනේ මචං.");
+      }
+    });
+  }
+
+  void _showError(String title, String msg) {
+    showDialog(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(msg),
+        actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text("OK"))],
+      ),
+    );
   }
 
   @override
   void dispose() {
     _bannerAd?.dispose();
+    connectivitySub.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text('🍎 Fridge to Table', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("🍎 Fridge to Table AI", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(
         children: [
-          // Modern Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search fridge items...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide.none,
+          // Recipe List (Infinite-like scroll)
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12),
+              itemCount: 15,
+              itemBuilder: (context, index) => Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                child: ListTile(
+                  leading: const CircleAvatar(backgroundColor: Colors.green, child: Icon(Icons.restaurant, color: Colors.white)),
+                  title: Text("Recipe Idea ${index + 1}", style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text("Tap to see ingredients and AI guide"),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14),
                 ),
               ),
             ),
           ),
-
-          // Fridge Items List
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildFoodItem("Milk Carton", "Expires in 2 days", Colors.blue.shade50, Icons.local_drink),
-                _buildFoodItem("Fresh Eggs", "Expires in 5 days", Colors.orange.shade50, Icons.egg),
-                _buildFoodItem("Green Spinach", "Expires today", Colors.green.shade50, Icons.eco),
-                _buildFoodItem("Chicken", "Expires in 1 day", Colors.red.shade50, Icons.kebab_dining),
-              ],
-            ),
-          ),
-
-          // Banner Ad එක පෙන්වන කොටස
-          if (_isBannerAdLoaded)
-            Container(
-              alignment: Alignment.center,
+          
+          // AdMob Banner at bottom
+          if (_isAdLoaded)
+            SizedBox(
               width: _bannerAd!.size.width.toDouble(),
               height: _bannerAd!.size.height.toDouble(),
               child: AdWidget(ad: _bannerAd!),
@@ -127,34 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () => _showError("AI Scan", "Gemini API Key එක තාම දාලා නැහැ මචං. ඒක දැම්ම ගමන් මේක වැඩ!"),
+        icon: const Icon(Icons.camera_alt),
+        label: const Text("Scan Fridge"),
         backgroundColor: Colors.green.shade700,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_a_photo),
-        label: const Text("Scan Fridge"),
-      ),
-    );
-  }
-
-  Widget _buildFoodItem(String name, String expiry, Color bgColor, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
-        ],
-      ),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, color: Colors.black87),
-        ),
-        title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(expiry, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
       ),
     );
   }
