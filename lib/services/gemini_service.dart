@@ -9,6 +9,7 @@ class GeminiService {
   late final GenerativeModel _visionModel;
 
   GeminiService(this.apiKey) {
+    // Model for structured recipe generation
     _model = GenerativeModel(
       model: 'gemini-1.5-flash',
       apiKey: apiKey,
@@ -16,7 +17,11 @@ class GeminiService {
         responseMimeType: 'application/json',
       ),
     );
-    _visionModel = _model; // Both use the same multimodal model
+    // Model for image identification (plain text output)
+    _visionModel = GenerativeModel(
+      model: 'gemini-1.5-flash',
+      apiKey: apiKey,
+    );
   }
 
   Future<List<Recipe>> generateRecipesFromIngredients(List<String> ingredients) async {
