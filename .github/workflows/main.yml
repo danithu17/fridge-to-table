@@ -40,10 +40,10 @@ jobs:
           mv lib_bak lib
           mv pubspec_bak pubspec.yaml
 
-          # Inject AdMob App ID into AndroidManifest.xml
+          # Inject AdMob App ID into AndroidManifest.xml (safely before closing tag)
           AD_MANIFEST="android/app/src/main/AndroidManifest.xml"
           if [ -f "$AD_MANIFEST" ]; then
-            sed -i '/<application/a \        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>' "$AD_MANIFEST"
+            sed -i 's|</application>|        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>\n    </application>|' "$AD_MANIFEST"
           fi
 
       - name: Install dependencies
