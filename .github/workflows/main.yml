@@ -22,15 +22,24 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.19.0" # Or your preferred version
+          flutter-version: "3.19.0"
           channel: "stable"
 
-<<<<<<< HEAD
-=======
       - name: Create Flutter project structure
-        run: flutter create --template=app --project-name=fridge_feast .
+        run: |
+          # Store current files
+          mkdir temp_src
+          cp -r lib temp_src/
+          cp pubspec.yaml temp_src/
 
->>>>>>> e63832a (Initial FridgeFeast commit with GitHub Actions)
+          # Re-create structure to get android/ios folders
+          flutter create --template=app --project-name=fridge_feast --offline .
+
+          # Restore original files
+          cp -r temp_src/lib/* lib/
+          cp temp_src/pubspec.yaml pubspec.yaml
+          rm -rf temp_src
+
       - name: Install dependencies
         run: flutter pub get
 

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/gemini_service.dart';
 import '../models/recipe.dart';
@@ -12,7 +13,7 @@ final isLoadingProvider = StateProvider<bool>((ref) => false);
 final recipesProvider = StateProvider<List<Recipe>>((ref) => []);
 
 // Note: In a real app, use a secure way to store API key
-const String _googleApiKey = 'AIzaSyCe7lSX2jYM2CxM6EdjQk2xcmivDSatGpQ';
+const String _googleApiKey = 'AIzaSyCsYrD4almitmT-rpqjBxoIsUzPry4-hJA';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
