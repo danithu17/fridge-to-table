@@ -1,4 +1,4 @@
-name: Full Project Build with AI and Ads
+name: Full Project Build Fixed
 
 on:
   push:
@@ -17,18 +17,29 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
+      # 1. Flutter Project එක හදනවා
       - name: Create Flutter Structure
         run: |
           flutter create --org com.danithu --project-name fridge_to_table . --overwrite
 
-      - name: Add All Dependencies
+      # 2. අවශ්‍ය Packages එකතු කිරීම (connectivity_plus එක 6.0.0 ට දාමු ප්‍රශ්න අඩු වෙන්න)
+      - name: Add Dependencies
         run: |
           flutter pub add google_mobile_ads google_fonts connectivity_plus google_generative_ai image_picker
 
+      # 3. Kotlin Version එක Update කිරීම
       - name: Update Kotlin Version
         run: |
           sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.0"/g' android/build.gradle
 
+      # 4. Android Build Configs (CompileSDK 34) හදමු - මේක තමයි Error එකට විසඳුම
+      - name: Fix Android Build Gradle
+        run: |
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' android/app/build.gradle
+          sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/g' android/app/build.gradle
+          sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
+
+      # 5. AndroidManifest එක නිවැරදිව ලිවීම
       - name: Setup Valid AndroidManifest
         run: |
           cat <<EOF > android/app/src/main/AndroidManifest.xml
@@ -63,23 +74,22 @@ jobs:
           </manifest>
           EOF
 
-      - name: Fix MinSDK
-        run: |
-          sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
-
+      # 6. APK Build කිරීම
       - name: Build Debug APK
         run: flutter build apk --debug
 
+      # 7. APK එක Upload කිරීම
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: fridge-to-table-full-v1
+          name: fridge-to-table-v2-fixed
           path: build/app/outputs/flutter-apk/app-debug.apk
 
+      # 8. සේරම Repo එකට Push කිරීම
       - name: Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Full AI + Ads + Connectivity Setup" || echo "No changes"
+          git commit -m "Fixed connectivity_plus compileSdkVersion and built APK" || echo "No changes"
           git push
