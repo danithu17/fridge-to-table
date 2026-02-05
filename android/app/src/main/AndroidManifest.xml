@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>
         android:label="fridge_to_table"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
