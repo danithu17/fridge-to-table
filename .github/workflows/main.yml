@@ -1,0 +1,81 @@
+name: Build & Release APK
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.0"
+          channel: "stable"
+
+      - name: Create Flutter project structure
+        run: |
+          # Backup our code and config
+          mv lib lib_bak
+          mv pubspec.yaml pubspec_bak
+
+          # Initialize standard Flutter structure (generates android, ios, etc.)
+          flutter config --no-analytics
+          flutter create --template=app --project-name=fridge_feast --overwrite .
+
+          # Restore our code and config
+          rm -rf lib
+          mv lib_bak lib
+          mv pubspec_bak pubspec.yaml
+
+          # Inject AdMob App ID into AndroidManifest.xml (safely before closing tag)
+          AD_MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$AD_MANIFEST" ]; then
+            sed -i 's|</application>|        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-7036399347927896~5750385934"/>\n    </application>|' "$AD_MANIFEST"
+          fi
+
+          # Fix minSdkVersion for AdMob (Required: 21)
+          GRADLE_APP_FILE="android/app/build.gradle"
+          if [ -f "$GRADLE_APP_FILE" ]; then
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' "$GRADLE_APP_FILE"
+            sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' "$GRADLE_APP_FILE"
+          fi
+
+          # Fix Kotlin version (Required: 1.9.10+ for newer dependencies)
+          GRADLE_PROJECT_FILE="android/build.gradle"
+          if [ -f "$GRADLE_PROJECT_FILE" ]; then
+            sed -i "s/ext.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.10'/g" "$GRADLE_PROJECT_FILE"
+          fi
+
+          GRADLE_SETTINGS_FILE="android/settings.gradle"
+          if [ -f "$GRADLE_SETTINGS_FILE" ]; then
+            sed -i 's/id "org.jetbrains.kotlin.android" version "[^"]*"/id "org.jetbrains.kotlin.android" version "1.9.10"/g' "$GRADLE_SETTINGS_FILE"
+          fi
+
+          # Create missing directories to avoid pubspec errors
+          mkdir -p assets/animations assets/images
+          touch assets/animations/.gitkeep assets/images/.gitkeep
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
