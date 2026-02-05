@@ -16,10 +16,7 @@ class GeminiService {
         responseMimeType: 'application/json',
       ),
     );
-    _visionModel = GenerativeModel(
-      model: 'gemini-1.5-flash',
-      apiKey: apiKey,
-    );
+    _visionModel = _model; // Both use the same multimodal model
   }
 
   Future<List<Recipe>> generateRecipesFromIngredients(List<String> ingredients) async {

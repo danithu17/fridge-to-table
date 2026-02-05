@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/recipe.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
@@ -9,56 +10,84 @@ class RecipeDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF9F9F4),
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
           _buildAppBar(context),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   _buildHeader(),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('Ingredients'),
-                  const SizedBox(height: 12),
-                  _buildIngredientsList(),
-                  const SizedBox(height: 32),
-                  _buildSectionTitle('Instructions'),
-                  const SizedBox(height: 12),
-                  _buildInstructionsList(),
-                  const SizedBox(height: 48),
-                ],
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 40),
+                    _buildSectionTitle('What you\'ll need'),
+                    const SizedBox(height: 20),
+                    _buildIngredientsList(),
+                    const SizedBox(height: 40),
+                    _buildSectionTitle('Steps to perfection'),
+                    const SizedBox(height: 20),
+                    _buildInstructionsList(),
+                    const SizedBox(height: 60),
+                  ],
+                ),
               ),
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.pop(context),
+        backgroundColor: const Color(0xFF2D3047),
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        label: Text('Back to Home', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
 
   Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 250,
+      expandedHeight: 300,
       pinned: true,
+      stretch: true,
+      leading: Container(),
       backgroundColor: const Color(0xFFFF6B35),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.pop(context),
-      ),
       flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFFF6B35), Color(0xFFF7C59F)],
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFFF6B35), Color(0xFF2D3047)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: const Center(
+                child: Icon(Icons.restaurant_menu_rounded, size: 100, color: Colors.white30),
+              ),
             ),
-          ),
-          child: const Center(
-            child: Icon(Icons.restaurant_menu, size: 80, color: Colors.white),
-          ),
+            const Positioned(
+              bottom: -1,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -68,52 +97,64 @@ class RecipeDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          recipe.title,
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3047),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                recipe.title,
+                style: GoogleFonts.outfit(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF2D3047),
+                  height: 1.1,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Text(
           recipe.description,
-          style: TextStyle(
+          style: GoogleFonts.outfit(
             fontSize: 16,
             color: Colors.grey.shade600,
-            height: 1.5,
+            height: 1.6,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         Row(
           children: [
-            _infoCard(Icons.timer_outlined, 'Prep Time', recipe.prepTime),
-            const SizedBox(width: 16),
-            _infoCard(Icons.bolt, 'Difficulty', recipe.difficulty),
+            _infoBadge(Icons.timer_outlined, recipe.prepTime, const Color(0xFFFF6B35)),
+            const SizedBox(width: 12),
+            _infoBadge(Icons.bolt_rounded, recipe.difficulty, const Color(0xFF2D3047)),
           ],
         ),
       ],
     );
   }
 
-  Widget _infoCard(IconData icon, String title, String value) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade100),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: const Color(0xFFFF6B35), size: 20),
-            const SizedBox(height: 4),
-            Text(title, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-          ],
-        ),
+  Widget _infoBadge(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              color: color,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -121,42 +162,65 @@ class RecipeDetailScreen extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 20,
+      style: GoogleFonts.outfit(
+        fontSize: 22,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF2D3047),
+        color: const Color(0xFF2D3047),
       ),
     );
   }
 
   Widget _buildIngredientsList() {
-    return Column(
-      children: recipe.ingredients.map((item) => Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Row(
-          children: [
-            const Icon(Icons.circle, size: 6, color: Color(0xFFFF6B35)),
-            const SizedBox(width: 12),
-            Expanded(child: Text(item, style: const TextStyle(fontSize: 15))),
-          ],
-        ),
-      )).toList(),
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: recipe.ingredients.map((item) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade100),
+          ),
+          child: Text(
+            item,
+            style: GoogleFonts.outfit(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF2D3047),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
   Widget _buildInstructionsList() {
     return Column(
       children: List.generate(recipe.instructions.length, (index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 28,
-                height: 28,
+                width: 36,
+                height: 36,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFF6B35),
+                  color: Color(0xFF2D3047),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -166,11 +230,15 @@ class RecipeDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Text(
                   recipe.instructions[index],
-                  style: const TextStyle(fontSize: 15, height: 1.5),
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    height: 1.6,
+                    color: const Color(0xFF2D3047).withOpacity(0.8),
+                  ),
                 ),
               ),
             ],
