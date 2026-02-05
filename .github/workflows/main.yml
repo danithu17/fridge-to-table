@@ -27,7 +27,12 @@ jobs:
         run: |
           flutter pub add google_mobile_ads google_fonts
 
-      # 3. වැරදුණු AndroidManifest එක අලුතින්ම නිවැරදිව ලිවීම
+      # 3. Kotlin Version එක 1.9.0 ට අප්ඩේට් කිරීම (Error එකට විසඳුම)
+      - name: Update Kotlin Version
+        run: |
+          sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.0"/g' android/build.gradle
+
+      # 4. AndroidManifest එක නිවැරදිව සැකසීම
       - name: Setup Valid AndroidManifest
         run: |
           cat <<EOF > android/app/src/main/AndroidManifest.xml
@@ -36,11 +41,9 @@ jobs:
                   android:label="Fridge to Table"
                   android:name="\${applicationName}"
                   android:icon="@mipmap/ic_launcher">
-                  
                   <meta-data
                       android:name="com.google.android.gms.ads.APPLICATION_ID"
                       android:value="${{ secrets.ADMOB_APP_ID }}"/>
-
                   <activity
                       android:name=".MainActivity"
                       android:exported="true"
@@ -64,27 +67,27 @@ jobs:
           </manifest>
           EOF
 
-      # 4. MinSDK එක 21 කරනවා
+      # 5. MinSDK 21 කිරීම
       - name: Fix MinSDK
         run: |
           sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
 
-      # 5. APK එක Build කරනවා
+      # 6. APK Build කිරීම
       - name: Build Debug APK
         run: flutter build apk --debug
 
-      # 6. APK එක Upload කිරීම
+      # 7. APK එක Upload කිරීම
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: fridge-to-table-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
 
-      # 7. සියල්ල Repo එකට Push කිරීම
-      - name: Push Project Files to Repo
+      # 8. සේරම Files Repo එකට Push කිරීම
+      - name: Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Fixed AndroidManifest and built APK" || echo "No changes"
+          git commit -m "Updated Kotlin version to 1.9.0 and fixed build" || echo "No changes"
           git push
