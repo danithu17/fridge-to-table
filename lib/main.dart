@@ -9,14 +9,10 @@ import 'screens/home_screen.dart';
 void main() async {
   // Ensure Flutter engine is ready
   WidgetsFlutterBinding.ensureInitialized();
-<<<<<<< HEAD
-  unawaited(MobileAds.instance.initialize());
-=======
   
   // Initialize Mobile Ads SDK
-  await MobileAds.instance.initialize();
-  
->>>>>>> 5a0b667382ec38c1f6d820dce5ef9441ab9eb3d0
+  unawaited(MobileAds.instance.initialize());
+
   runApp(
     const ProviderScope(
       child: FridgeToTableApp(),
@@ -34,7 +30,6 @@ class FridgeToTableApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-<<<<<<< HEAD
         scaffoldBackgroundColor: const Color(0xFFF9F9F4),
         colorSchemeSeed: const Color(0xFFFF6B35),
         textTheme: GoogleFonts.outfitTextTheme(),
@@ -42,17 +37,6 @@ class FridgeToTableApp extends StatelessWidget {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           color: Colors.white,
-=======
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF6B35), // The Orange 'Foodie' color
-          primary: const Color(0xFFFF6B35),
-          secondary: const Color(0xFFF7C59F),
-          surface: Colors.white,
-          background: const Color(0xFFFAFAFA),
-        ),
-        textTheme: GoogleFonts.outfitTextTheme(
-          Theme.of(context).textTheme,
->>>>>>> 5a0b667382ec38c1f6d820dce5ef9441ab9eb3d0
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
