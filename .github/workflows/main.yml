@@ -1,9 +1,9 @@
-name: Flutter Setup and AdMob Config
+name: Generate Flutter Project and Build APK
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Actions ටැබ් එකෙන් අතින් රන් කරන්නත් පුළුවන්
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,31 +17,46 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      # 1. පවතින ෆෝල්ඩරය ඇතුළේ Flutter Project එකක් අලුතින් හදනවා
-      - name: Create Flutter Project Structure
+      # 1. Flutter Project එක හදනවා (නැතිනම්)
+      - name: Create Flutter Structure
         run: |
-          if [ ! -d "android" ]; then
-            flutter create --org com.danithu --project-name fridge_to_table . --overwrite
-          fi
+          flutter create --org com.danithu --project-name fridge_to_table . --overwrite
 
-      # 2. AdMob ID එක Manifest එකට ඇතුල් කිරීම
-      # මෙතන 'YOUR_ADMOB_APP_ID' වෙනුවට GitHub Secret එකේ තියෙන ID එක දානවා
-      - name: Inject AdMob App ID
+      # 2. අවශ්‍ය Packages (AdMob, Fonts) එකතු කිරීම
+      - name: Add Dependencies
+        run: |
+          flutter pub add google_mobile_ads google_fonts
+
+      # 3. AdMob App ID එක Manifest එකට දානවා
+      - name: Inject AdMob ID
         run: |
           FILE="android/app/src/main/AndroidManifest.xml"
-          # <application> ටැග් එකට පස්සේ AdMob metadata එක ඇතුල් කරනවා
-          sed -i '/<application/a \        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${{ secrets.ADMOB_APP_ID }}"/>' $FILE
+          # දැනටමත් තියෙනවාද බලලා නැතිනම් විතරක් ඇඩ් කරනවා
+          if ! grep -q "APPLICATION_ID" "$FILE"; then
+            sed -i '/<application/a \        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${{ secrets.ADMOB_APP_ID }}"/>' $FILE
+          fi
 
-      # 3. minSdkVersion 21 ට වැඩිකිරීම
-      - name: Update minSdkVersion
+      # 4. MinSDK එක 21 කරනවා
+      - name: Fix MinSDK
         run: |
           sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
 
-      # 4. වෙනස්කම් ටික ආපහු Repo එකට Push කිරීම
-      - name: Commit and Push changes
+      # 5. APK එක Build කරනවා
+      - name: Build Debug APK
+        run: flutter build apk --debug
+
+      # 6. APK එක Upload කිරීම (Download කරගන්න)
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: fridge-to-table-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+      # 7. සියලුම වෙනස්කම් (pubspec.yaml ඇතුළුව) Repo එකට Push කිරීම
+      - name: Push Project Files to Repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Automated Flutter project setup and AdMob config" || echo "No changes to commit"
+          git commit -m "Added AdMob & Fonts dependencies and updated project" || echo "No changes"
           git push
