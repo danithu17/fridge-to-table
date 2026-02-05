@@ -25,6 +25,12 @@ jobs:
           flutter-version: "3.19.0" # Or your preferred version
           channel: "stable"
 
+<<<<<<< HEAD
+=======
+      - name: Create Flutter project structure
+        run: flutter create --template=app --project-name=fridge_feast .
+
+>>>>>>> e63832a (Initial FridgeFeast commit with GitHub Actions)
       - name: Install dependencies
         run: flutter pub get
 

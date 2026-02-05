@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+# fridge-to-table
+=======
+>>>>>>> e63832a (Initial FridgeFeast commit with GitHub Actions)
 # FridgeFeast 🥘
 
 FridgeFeast is a cross-platform mobile app built with Flutter and powered by Google Gemini AI. It helps you find creative recipes using exactly what's in your fridge.
@@ -34,3 +40,7 @@ flutter run
 - `flutter_riverpod`: State management.
 - `google_fonts`: Outfit typography.
 - `lottie`: Smooth animations.
+<<<<<<< HEAD
+=======
+>>>>>>> 55d74af (Initial FridgeFeast commit with GitHub Actions)
+>>>>>>> e63832a (Initial FridgeFeast commit with GitHub Actions)
