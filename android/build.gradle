@@ -9,27 +9,19 @@ rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
-subprojects {
-    project.evaluationDependsOn(':app')
-}
 
-// Safely force SDK versions on all Android subprojects
+// Fixed: Removed evaluationDependsOn(':app') as it causes evaluation order issues
+
 subprojects {
-    project.plugins.withId('com.android.application') {
-        project.android {
-            compileSdk 34
-            buildToolsVersion "34.0.0"
-            defaultConfig {
-                targetSdk 34
-            }
-        }
-    }
-    project.plugins.withId('com.android.library') {
-        project.android {
-            compileSdk 34
-            buildToolsVersion "34.0.0"
-            defaultConfig {
-                targetSdk 34
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                // Using compileSdkVersion instead of compileSdk for better plugin compatibility
+                compileSdkVersion 34
+                buildToolsVersion "34.0.0"
+                defaultConfig {
+                    targetSdkVersion 34
+                }
             }
         }
     }
