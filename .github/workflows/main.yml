@@ -1,0 +1,95 @@
+name: Full Project Build Fixed
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+
+      # 1. Flutter Project එක හදනවා
+      - name: Create Flutter Structure
+        run: |
+          flutter create --org com.danithu --project-name fridge_to_table . --overwrite
+
+      # 2. අවශ්‍ය Packages එකතු කිරීම (connectivity_plus එක 6.0.0 ට දාමු ප්‍රශ්න අඩු වෙන්න)
+      - name: Add Dependencies
+        run: |
+          flutter pub add google_mobile_ads google_fonts connectivity_plus google_generative_ai image_picker
+
+      # 3. Kotlin Version එක Update කිරීම
+      - name: Update Kotlin Version
+        run: |
+          sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.0"/g' android/build.gradle
+
+      # 4. Android Build Configs (CompileSDK 34) හදමු - මේක තමයි Error එකට විසඳුම
+      - name: Fix Android Build Gradle
+        run: |
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' android/app/build.gradle
+          sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/g' android/app/build.gradle
+          sed -i 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
+
+      # 5. AndroidManifest එක නිවැරදිව ලිවීම
+      - name: Setup Valid AndroidManifest
+        run: |
+          cat <<EOF > android/app/src/main/AndroidManifest.xml
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.CAMERA"/>
+              <application
+                  android:label="Fridge to Table AI"
+                  android:name="\${applicationName}"
+                  android:icon="@mipmap/ic_launcher">
+                  <meta-data
+                      android:name="com.google.android.gms.ads.APPLICATION_ID"
+                      android:value="${{ secrets.ADMOB_APP_ID }}"/>
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:launchMode="singleTop"
+                      android:theme="@style/LaunchTheme"
+                      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+                      android:hardwareAccelerated="true"
+                      android:windowSoftInputMode="adjustResize">
+                      <meta-data
+                        android:name="io.flutter.embedding.android.NormalTheme"
+                        android:resource="@style/NormalTheme" />
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+                  </activity>
+                  <meta-data android:name="flutterEmbedding" android:value="2" />
+              </application>
+          </manifest>
+          EOF
+
+      # 6. APK Build කිරීම
+      - name: Build Debug APK
+        run: flutter build apk --debug
+
+      # 7. APK එක Upload කිරීම
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: fridge-to-table-v2-fixed
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+      # 8. සේරම Repo එකට Push කිරීම
+      - name: Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Fixed connectivity_plus compileSdkVersion and built APK" || echo "No changes"
+          git push
