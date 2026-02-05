@@ -27,18 +27,18 @@ jobs:
 
       - name: Create Flutter project structure
         run: |
-          # Store current files
-          mkdir temp_src
-          cp -r lib temp_src/
-          cp pubspec.yaml temp_src/
+          # Backup our code and config
+          mv lib lib_bak
+          mv pubspec.yaml pubspec_bak
 
-          # Re-create structure to get android/ios folders
-          flutter create --template=app --project-name=fridge_feast --offline .
+          # Initialize standard Flutter structure (generates android, ios, etc.)
+          flutter config --no-analytics
+          flutter create --template=app --project-name=fridge_feast --overwrite .
 
-          # Restore original files
-          cp -r temp_src/lib/* lib/
-          cp temp_src/pubspec.yaml pubspec.yaml
-          rm -rf temp_src
+          # Restore our code and config
+          rm -rf lib
+          mv lib_bak lib
+          mv pubspec_bak pubspec.yaml
 
       - name: Install dependencies
         run: flutter pub get
