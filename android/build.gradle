@@ -13,26 +13,23 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
-// Fixed the evaluation order issue
+// Safely force SDK versions on all Android subprojects
 subprojects {
-    project.configurations.all {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'com.android.tools.build' && details.requested.name == 'gradle') {
-                details.useVersion '8.1.0'
+    project.plugins.withId('com.android.application') {
+        project.android {
+            compileSdk 34
+            buildToolsVersion "34.0.0"
+            defaultConfig {
+                targetSdk 34
             }
         }
     }
-}
-
-// Apply these settings directly without afterEvaluate where possible
-// or use a more robust way to force versions
-subprojects {
-    project.plugins.withType(com.android.build.gradle.BasePlugin) {
+    project.plugins.withId('com.android.library') {
         project.android {
-            compileSdkVersion 34
+            compileSdk 34
             buildToolsVersion "34.0.0"
             defaultConfig {
-                targetSdkVersion 34
+                targetSdk 34
             }
         }
     }
