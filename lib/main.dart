@@ -92,7 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // ඔයා එවපු API Key එක මෙතන තියෙනවා
       const apiKey = "AIzaSyCVpg99ta6BidHN46IPknuV4IpDNWCnO8M"; 
       final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
 
@@ -127,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _bannerAd?.dispose();
     _connectivitySub.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // මෙතන තමයි Font එක හදලා තියෙන්නේ
+        // මෙතන තමයි Font එක හදලා තියෙන්නේ (fredokaOne වෙනුවට lobster)
         title: Text("FridgeFeast", style: GoogleFonts.lobster(color: const Color(0xFFFF6D3F), fontSize: 28)),
         centerTitle: true,
       ),
