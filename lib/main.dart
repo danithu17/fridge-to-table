@@ -3,9 +3,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:async';
-import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +20,7 @@ class FridgeFeastApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xFFFF6D3F), // FridgeFeast Orange Theme
+        colorSchemeSeed: const Color(0xFFFF6D3F),
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
       home: const HomeScreen(),
@@ -52,24 +50,24 @@ class _HomeScreenState extends State<HomeScreen> {
     _checkInternet();
   }
 
-  // AdMob Setup - සල්ලි හම්බවෙන්න නම් පස්සේ ඔයාගේ Real ID එක මෙතනට දාන්න
   void _initAd() {
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-7036399347927896/6074120884', // දැනට Test ID එකක් තියෙන්නේ
+      adUnitId: 'ca-app-pub-7036399347927896/6074120884', 
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
         onAdLoaded: (ad) => setState(() => _isAdLoaded = true),
-        onAdFailedToLoad: (ad, err) => ad.dispose(),
+        onAdFailedToLoad: (ad, err) {
+          ad.dispose();
+        },
       ),
     )..load();
   }
 
-  // Internet නැති වුණොත් දැනුම් දෙනවා
   void _checkInternet() {
     _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       if (results.contains(ConnectivityResult.none)) {
-        _showErrorDialog("Connection Lost", "AI එක වැඩ කරන්න ඉන්ටර්නෙට් ඕනේ මචං!");
+        _showErrorDialog("Offline!", "AI වැඩ කරන්න ඉන්ටර්නෙට් ඕනේ මචං!");
       }
     });
   }
@@ -78,33 +76,32 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(title),
         content: Text(msg),
         actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text("OK"))],
       ),
     );
   }
 
-  // AI Recipe Generation Fix
   Future<void> _generateRecipes() async {
     if (_ingredients.isEmpty) {
-      _showErrorDialog("හිස්නෙ මචං", "මොනවා හරි දේවල් ටිකක් කලින් ඇඩ් කරන්න.");
+      _showErrorDialog("හිස්නෙ මචං", "මොනවා හරි ඇතුළත් කරන්න.");
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      // මෙතනට ඔයාගේ Gemini API Key එක අනිවාර්යයෙන් දාන්න
-      const apiKey = "මෙතනට_ඔයාගේ_API_KEY_එක_දාන්න";
+      // ඔයා එවපු API Key එක මෙතන තියෙනවා
+      const apiKey = "AIzaSyCVpg99ta6BidHN46IPknuV4IpDNWCnO8M"; 
       final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
 
-      final prompt = "I have ${_ingredients.join(", ")} in my fridge. Give me 3 creative recipes.";
+      final prompt = "I have ${_ingredients.join(", ")}. Give me 3 quick recipes.";
       final response = await model.generateContent([Content.text(prompt)]);
 
-      _showResultSheet(response.text ?? "සොරි මචං, AI එකට උත්තරයක් දෙන්න බැරි වුණා.");
+      _showResultSheet(response.text ?? "සොරි, උත්තරයක් ලැබුණේ නැහැ.");
     } catch (e) {
-      _showErrorDialog("AI Error", "API Key එක හෝ ඉන්ටර්නෙට් චෙක් කරන්න.");
+      _showErrorDialog("AI Error", "API Key එක හෝ නෙට්වර්ක් අවුලක්.");
     } finally {
       setState(() => _isLoading = false);
     }
@@ -136,98 +133,54 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("FridgeFeast", style: GoogleFonts.fredokaOne(color: const Color(0xFFFF6D3F), fontSize: 28)),
+        // මෙතන තමයි Font එක හදලා තියෙන්නේ
+        title: Text("FridgeFeast", style: GoogleFonts.lobster(color: const Color(0xFFFF6D3F), fontSize: 28)),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [IconButton(onPressed: () => setState(() => _ingredients.clear()), icon: const Icon(Icons.refresh))],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(20),
+            child: Row(
               children: [
-                const Text("What's in your fridge?", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2D2D2D))),
-                const SizedBox(height: 15),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        decoration: InputDecoration(
-                          hintText: "Add ingredient (e.g. Tomato)",
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    _actionButton(Icons.add, () {
-                      if (_controller.text.isNotEmpty) {
-                        setState(() { _ingredients.add(_controller.text); _controller.clear(); });
-                      }
-                    }),
-                  ],
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: const InputDecoration(hintText: "Add ingredient"),
+                  ),
                 ),
+                IconButton(icon: const Icon(Icons.add), onPressed: _addIngredient),
               ],
             ),
           ),
-          
-          // Ingredient List
           Expanded(
             child: ListView.builder(
               itemCount: _ingredients.length,
-              itemBuilder: (context, index) => Card(
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                child: ListTile(
-                  title: Text(_ingredients[index]),
-                  trailing: IconButton(icon: const Icon(Icons.close, color: Colors.red), onPressed: () => setState(() => _ingredients.removeAt(index))),
-                ),
+              itemBuilder: (context, index) => ListTile(
+                title: Text(_ingredients[index]),
+                trailing: IconButton(icon: const Icon(Icons.delete), onPressed: () => setState(() => _ingredients.removeAt(index))),
               ),
             ),
           ),
-
-          if (_isLoading) const CircularProgressIndicator(color: Color(0xFFFF6D3F)),
-
-          // Generate Button
+          if (_isLoading) const CircularProgressIndicator(),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6D3F),
-                minimumSize: const Size(double.infinity, 55),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              ),
-              onPressed: _generateRecipes,
-              child: const Text("Generate Creative Recipes", style: TextStyle(fontSize: 18, color: Colors.white)),
-            ),
+            child: ElevatedButton(onPressed: _generateRecipes, child: const Text("Generate Recipes")),
           ),
-
-          // AdMob Banner
           if (_isAdLoaded)
-            SizedBox(
-              height: _bannerAd!.size.height.toDouble(),
-              width: _bannerAd!.size.width.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
+            SizedBox(height: 50, child: AdWidget(ad: _bannerAd!)),
         ],
       ),
     );
   }
 
-  Widget _actionButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: const Color(0xFFFFF0EB), borderRadius: BorderRadius.circular(15)),
-        child: Icon(icon, color: const Color(0xFFFF6D3F)),
-      ),
-    );
+  void _addIngredient() {
+    if (_controller.text.trim().isNotEmpty) {
+      setState(() {
+        _ingredients.add(_controller.text.trim());
+        _controller.clear();
+      });
+    }
   }
 }
