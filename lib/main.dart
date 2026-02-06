@@ -7,6 +7,7 @@ import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // AdMob initialize කරනවා
   unawaited(MobileAds.instance.initialize());
   runApp(const FridgeFeastApp());
 }
@@ -50,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _checkInternet();
   }
 
+  // 1. AdMob Banner ID එක මෙතන තියෙන්නේ
   void _initAd() {
     _bannerAd = BannerAd(
       adUnitId: 'ca-app-pub-7036399347927896/6074120884', 
@@ -83,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 2. Gemini AI වැඩ කරන තැන
   Future<void> _generateRecipes() async {
     if (_ingredients.isEmpty) {
       _showErrorDialog("හිස්නෙ මචං", "මොනවා හරි ඇතුළත් කරන්න.");
@@ -92,15 +95,25 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // ඔයාගේ API Key එක
       const apiKey = "AIzaSyCVpg99ta6BidHN46IPknuV4IpDNWCnO8M"; 
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
+      
+      final model = GenerativeModel(
+        model: 'gemini-1.5-flash', 
+        apiKey: apiKey,
+      );
 
-      final prompt = "I have ${_ingredients.join(", ")}. Give me 3 quick recipes.";
-      final response = await model.generateContent([Content.text(prompt)]);
+      final prompt = "I have these ingredients: ${_ingredients.join(", ")}. Please give me 3 easy recipes I can make with them.";
+      final content = [Content.text(prompt)];
+      final response = await model.generateContent(content);
 
-      _showResultSheet(response.text ?? "සොරි, උත්තරයක් ලැබුණේ නැහැ.");
+      if (response.text != null) {
+        _showResultSheet(response.text!);
+      } else {
+        _showErrorDialog("AI Error", "AI එකට පිළිතුරක් දෙන්න බැරි වුණා.");
+      }
     } catch (e) {
-      _showErrorDialog("AI Error", "API Key එක හෝ නෙට්වර්ක් අවුලක්.");
+      _showErrorDialog("AI Error", "API Key එක හෝ Network අවුලක් තියෙනවා.");
     } finally {
       setState(() => _isLoading = false);
     }
@@ -134,7 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // මෙතන තමයි Font එක හදලා තියෙන්නේ (fredokaOne වෙනුවට lobster)
         title: Text("FridgeFeast", style: GoogleFonts.lobster(color: const Color(0xFFFF6D3F), fontSize: 28)),
         centerTitle: true,
       ),
@@ -147,10 +159,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(hintText: "Add ingredient"),
+                    decoration: const InputDecoration(
+                      hintText: "What's in your fridge?",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-                IconButton(icon: const Icon(Icons.add), onPressed: _addIngredient),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: const Icon(Icons.add_circle, color: Color(0xFFFF6D3F), size: 40),
+                  onPressed: _addIngredient,
+                ),
               ],
             ),
           ),
@@ -158,18 +177,31 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView.builder(
               itemCount: _ingredients.length,
               itemBuilder: (context, index) => ListTile(
+                leading: const Icon(Icons.restaurant_menu),
                 title: Text(_ingredients[index]),
-                trailing: IconButton(icon: const Icon(Icons.delete), onPressed: () => setState(() => _ingredients.removeAt(index))),
+                trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => setState(() => _ingredients.removeAt(index))),
               ),
             ),
           ),
           if (_isLoading) const CircularProgressIndicator(),
           Padding(
             padding: const EdgeInsets.all(20),
-            child: ElevatedButton(onPressed: _generateRecipes, child: const Text("Generate Recipes")),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D3F),
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              onPressed: _generateRecipes, 
+              child: const Text("Generate Recipes", style: TextStyle(color: Colors.white)),
+            ),
           ),
+          // 3. පහළින් ඇඩ් එක පෙන්නනවා
           if (_isAdLoaded)
-            SizedBox(height: 50, child: AdWidget(ad: _bannerAd!)),
+            SizedBox(
+              height: _bannerAd!.size.height.toDouble(),
+              width: _bannerAd!.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
         ],
       ),
     );
